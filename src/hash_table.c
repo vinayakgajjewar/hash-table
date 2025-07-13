@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -44,4 +45,24 @@ void ht_del_hash_table(ht_hash_table *ht) {
     }
     free(ht->items);
     free(ht);
+}
+
+/*
+ * a should be a prime number that is larger than the size of the alphabet.
+ * ASCII has an alphabet size of 128, so choose a prime larger than that.
+ *
+ * m is the number of buckets we have in the hash table.
+ *
+ * This hash function has two steps:
+ * 1. Convert the string into a large integer.
+ * 2. Reduce the integer into a fixed range by taking its remainder mod m.
+ */
+static int ht_hash(const char *s, const int a, const int m) {
+    long hash = 0;
+    const int len_s = strlen(s);
+    for (int i = 0; i < len_s; i++) {
+        hash += (long) pow(a, len_s - (i + 1)) * s[i];
+        hash = hash % m;
+    }
+    return (int) hash;
 }
