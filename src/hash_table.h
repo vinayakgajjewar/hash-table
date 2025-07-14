@@ -1,10 +1,5 @@
-/*
- * TODO
- * I'm just guessing what these values should be. I'm using them in the
- * ht_get_hash function.
- */
-const int HT_PRIME_1 = 131;
-const int HT_PRIME_2 = 257;
+#ifndef HASH_TABLE_H_
+#define HASH_TABLE_H_
 
 typedef struct {
     char *key;
@@ -32,3 +27,11 @@ void ht_del_hash_table(ht_hash_table *ht);
 static int ht_hash(const char *s, int a, int m);
 
 static int ht_get_hash(const char *s, int num_buckets, int attempt);
+
+void ht_insert(ht_hash_table *ht, const char *key, const char *value);
+
+char *ht_search(ht_hash_table *ht, const char *key);
+
+void ht_delete(ht_hash_table *ht, const char *key);
+
+#endif

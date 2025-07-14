@@ -4,6 +4,14 @@
 
 #include "hash_table.h"
 
+/*
+ * TODO
+ * I'm just guessing what these values should be. I'm using them in the
+ * ht_get_hash function.
+ */
+const int HT_PRIME_1 = 131;
+const int HT_PRIME_2 = 257;
+
 static ht_item *ht_new_item(const char *k, const char *v) {
     ht_item *i = malloc(sizeof(ht_item));
     i->key = strdup(k);
@@ -59,7 +67,7 @@ void ht_del_hash_table(ht_hash_table *ht) {
  */
 static int ht_hash(const char *s, const int a, const int m) {
     long hash = 0;
-    const int len_s = strlen(s);
+    const int len_s = (int) strlen(s);
     for (int i = 0; i < len_s; i++) {
         hash += (long) pow(a, len_s - (i + 1)) * s[i];
         hash = hash % m;
@@ -77,3 +85,45 @@ static int ht_get_hash(const char *s, const int num_buckets, const int attempt) 
     const int hash_b = ht_hash(s, HT_PRIME_2, num_buckets);
     return (hash_a + (attempt * (hash_b + 1))) % num_buckets;
 }
+
+/*
+ * Keep trying different buckets until we find an empty one. When we do, store
+ * the data item there.
+ */
+void ht_insert(ht_hash_table *ht, const char *key, const char *value) {
+    ht_item *item = ht_new_item(key, value);
+    int index = ht_get_hash(item->key, ht->size, 0);
+    ht_item *cur_item = ht->items[index];
+    int attempt = 1;
+    while (cur_item != NULL) {
+        index = ht_get_hash(item->key, ht->size, attempt);
+        cur_item = ht->items[index];
+        attempt++;
+    }
+    ht->items[index] = item;
+    ht->count++;
+}
+
+/*
+ * Keep trying different buckets until we find the key we're looking for. If we
+ * hit an empty bucket, indicate that no value was found.
+ */
+char *ht_search(ht_hash_table *ht, const char *key) {
+    int index = ht_get_hash(key, ht->size, 0);
+    ht_item *item = ht->items[index];
+    int attempt = 1;
+    while (item != NULL) {
+        if (strcmp(item->key, key) == 0) {
+            return item->value;
+        }
+        index = ht_get_hash(key, ht->size, attempt);
+        item = ht->items[index];
+        attempt++;
+    }
+    return NULL;
+}
+
+/*
+ * TODO
+ * Implement delete and update functionality.
+ */
